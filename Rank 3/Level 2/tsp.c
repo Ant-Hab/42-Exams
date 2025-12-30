@@ -3,95 +3,63 @@
 #include <math.h>
 #include <float.h>
 
-typedef struct {
-    float x;
-    float y;
-} Point;
+float min_len = FLT_MAX;
 
-float distance(Point a, Point b) {
-    float dx = a.x - b.x;
-    float dy = a.y - b.y;
+float get_dist(float *pts, int i, int j)
+{
+    float dx = pts[2 * i] - pts[2 * j];
+    float dy = pts[2 * i + 1] - pts[2 * j + 1];
     return sqrtf(dx * dx + dy * dy);
 }
 
-void swap(int *a, int *b) {
-    int tmp = *a;
-    *a = *b;
-    *b = tmp;
-}
-
-float path_length(Point *cities, int *perm, int n) {
-    float len = 0.0f;
-    int i;
-    for (i = 0; i < n; i++) {
-        Point p1 = cities[perm[i]];
-        Point p2 = cities[perm[(i + 1) % n]]; // wrap around
-        len += distance(p1, p2);
-    }
-    return len;
-}
-
-void permute(Point *cities, int *perm, int l, int r, float *min_len) {
-    int i;
-    if (l == r) {
-        float len = path_length(cities, perm, r + 1);
-        if (len < *min_len)
-            *min_len = len;
+void solve(float *pts, int *p, int n, int k)
+{
+    if (k == n)
+    {
+        float d = 0;
+        for (int i = 0; i < n; i++)
+            d += get_dist(pts, p[i], p[(i + 1) % n]);
+        if (d < min_len)
+            min_len = d;
         return;
     }
-    for (i = l; i <= r; i++) {
-        swap(&perm[l], &perm[i]);
-        permute(cities, perm, l + 1, r, min_len);
-        swap(&perm[l], &perm[i]);
+    for (int i = k; i < n; i++)
+    {
+        int t = p[k]; p[k] = p[i]; p[i] = t;
+        solve(pts, p, n, k + 1);
+        t = p[k]; p[k] = p[i]; p[i] = t;
     }
 }
 
-int main(void) {
-    Point *cities = NULL;
-    int capacity = 10, n = 0;
-    cities = (Point *)malloc(sizeof(Point) * capacity);
-    if (!cities)
-        return 1;
+int main(void)
+{
+    int n = 0, cap = 0, *p = NULL;
+    float *pts = NULL, x, y;
 
-    while (1) {
-        if (n >= capacity) {
-            capacity *= 2;
-            Point *tmp = (Point *)realloc(cities, sizeof(Point) * capacity);
-            if (!tmp) {
-                free(cities);
-                return 1;
-            }
-            cities = tmp;
+    while (fscanf(stdin, "%f, %f", &x, &y) == 2)
+    {
+        if (n == cap)
+        {
+            cap = cap ? cap * 2 : 16;
+            pts = realloc(pts, sizeof(float) * 2 * cap);
         }
-        int res = fscanf(stdin, "%f, %f\n", &cities[n].x, &cities[n].y);
-        if (res != 2)
-            break;
+        pts[2 * n] = x;
+        pts[2 * n + 1] = y;
         n++;
     }
 
-    if (n == 0) {
-        write(1, "0.00\n", 5);
-        free(cities);
-        return 0;
+    if (n > 0)
+    {
+        p = malloc(sizeof(int) * n);
+        for (int i = 0; i < n; i++)
+            p[i] = i;
+        solve(pts, p, n, 0);
+        free(p);
     }
+    else
+        min_len = 0.0f;
 
-    int *perm = (int *)malloc(sizeof(int) * n);
-    if (!perm) {
-        free(cities);
-        return 1;
-    }
-    int i;
-    for (i = 0; i < n; i++)
-        perm[i] = i;
-
-    float min_len = FLT_MAX;
-    permute(cities, perm, 0, n - 1, &min_len);
-
-    char buffer[32];
-    int len = snprintf(buffer, sizeof(buffer), "%.2f\n", min_len);
-    write(1, buffer, len);
-
-    free(cities);
-    free(perm);
+    fprintf(stdout, "%.2f\n", min_len);
+    free(pts);
     return 0;
 }

@@ -1,93 +1,46 @@
 #include <unistd.h>
 
-int is_balanced(char *s)
+void solve(char *s, int i, int last, char *p)
 {
-    int i = 0;
-    int count = 0;
-    while (s[i])
+    int c = 0, k = i;
+    while (s[k])
     {
-        if (s[i] == '(')
-            count++;
-        else if (s[i] == ')')
+        if (s[k] == *p) c++;
+        else if (s[k] == p[1]) c--;
+        if (c < 0)
         {
-            count--;
-            if (count < 0)
-                return 0;
-        }
-        i++;
-    }
-    if (count == 0)
-        return 1;
-    return 0;
-}
-
-void write_str(char *s)
-{
-    int i = 0;
-    while (s[i])
-        i++;
-    write(1, s, i);
-    write(1, "\n", 1);
-}
-
-void remove_invalid(char *s, int start, int last_remove, char par[2])
-{
-    int i;
-    int count = 0;
-    i = start;
-    while (s[i])
-    {
-        if (s[i] == par[0])
-            count++;
-        if (s[i] == par[1])
-            count--;
-        if (count >= 0)
-        {
-            i++;
-            continue;
-        }
-        int j = last_remove;
-        while (j <= i)
-        {
-            if (s[j] == par[1] && (j == last_remove || s[j - 1] != par[1]))
+            int j = last;
+            while (j <= k)
             {
-                s[j] = ' ';
-                remove_invalid(s, i + 1, j, par);
-                s[j] = par[1];
+                if (s[j] == p[1] && (j == last || s[j - 1] != p[1]))
+                {
+                    s[j] = ' ';
+                    solve(s, k + 1, j, p);
+                    s[j] = p[1];
+                }
+                j++;
             }
-            j++;
+            return;
         }
-        return;
-    }
-   
-    char rev[1024];
-    int len = 0;
-    while (s[len])
-        len++;
-    int k = 0;
-    while (len - 1 - k >= 0)
-    {
-        rev[k] = s[len - 1 - k];
         k++;
     }
-    rev[k] = 0;
-    if (par[0] == '(')
-    {
-        char new_par[2];
-        new_par[0] = ')';
-        new_par[1] = '(';
-        remove_invalid(rev, 0, 0, new_par);
-    }
+    char b[4096];
+    int l = k, x = 0;
+    while (l--) b[x++] = s[l];
+    b[x] = 0;
+    if (*p == '(')
+        solve(b, 0, 0, ")(");
     else
     {
-        write_str(rev);
+        write(1, b, x);
+        write(1, "\n", 1);
     }
 }
 
-int main(int argc, char **argv)
+int main(int ac, char **av)
 {
-    if (argc != 2)
+    if (ac != 2)
         return 1;
-    remove_invalid(argv[1], 0, 0, (char[2]){'(', ')'});
+    solve(av[1], 0, 0, "()");
     return 0;
 }

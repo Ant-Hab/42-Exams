@@ -1,92 +1,33 @@
-#include <unistd.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-int ft_atoi(char *s)
-{
-    int i = 0, sign = 1, n = 0;
-    if (!s)
-        return 0;
-    if (s[i] == '-')
-    {
-        sign = -1;
-        i++;
-    }
-    while (s[i] >= '0' && s[i] <= '9')
-    {
-        n = n * 10 + (s[i] - '0');
-        i++;
-    }
-    return n * sign;
-}
-
-void print_subset(int *subset, int len)
-{
-    int i = 0;
-    while (i < len)
-    {
-        if (i > 0)
-            write(1, " ", 1);
-        char buf[12];
-        int n = subset[i], j = 11;
-        buf[11] = '\0';
-        int neg = 0;
-        if (n == 0)
-            buf[10] = '0';
-        else
-        {
-            if (n < 0)
-            {
-                neg = 1;
-                n = -n;
-            }
-            while (n > 0)
-            {
-                buf[--j] = (n % 10) + '0';
-                n /= 10;
-            }
-            if (neg)
-                buf[--j] = '-';
-        }
-        write(1, buf + j, 11 - j);
-        i++;
-    }
-    write(1, "\n", 1);
-}
-
-void backtrack(int *set, int set_len, int *subset, int sub_len, int target, int idx, int sum)
+void solve(int *set, int n, int *sub, int len, int idx, int sum, int target)
 {
     if (sum == target)
     {
-        print_subset(subset, sub_len);
+        for (int i = 0; i < len; i++)
+            printf("%d%c", sub[i], (i == len - 1) ? '\n' : ' ');
+        if (len == 0)
+            printf("\n");
     }
-    int i = idx;
-    while (i < set_len)
+    for (int i = idx; i < n; i++)
     {
-        subset[sub_len] = set[i];
-        backtrack(set, set_len, subset, sub_len + 1, target, i + 1, sum + set[i]);
-        i++;
+        sub[len] = set[i];
+        solve(set, n, sub, len + 1, i + 1, sum + set[i], target);
     }
 }
 
-int main(int argc, char **argv)
+int main(int ac, char **av)
 {
-    if (argc < 3)
+    if (ac < 3)
         return 1;
-    int target = ft_atoi(argv[1]);
-    int set_len = argc - 2;
-    int *set = (int *)malloc(sizeof(int) * set_len);
-    int *subset = (int *)malloc(sizeof(int) * set_len);
-    if (!set || !subset)
+    int n = ac - 2;
+    int *arr = malloc(sizeof(int) * n * 2);
+    if (!arr)
         return 1;
-    int i = 0;
-    while (i < set_len)
-    {
-        set[i] = ft_atoi(argv[i + 2]);
-        i++;
-    }
-    backtrack(set, set_len, subset, 0, target, 0, 0);
-    free(set);
-    free(subset);
+    for (int i = 0; i < n; i++)
+        arr[i] = atoi(av[i + 2]);
+    solve(arr, n, arr + n, 0, 0, 0, atoi(av[1]));
+    free(arr);
     return 0;
 }
