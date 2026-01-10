@@ -72,25 +72,44 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
 
 int main(int ac, char **av)
 {
-    if (ac != 2 || !av[1][0])
-        return 1;
     char *s = NULL, buf[128];
     int len = 0, r;
+
+    if (ac != 2 || !av[1][0])
+        return 1;
+
     while ((r = read(0, buf, 128)) > 0)
     {
-        s = realloc(s, len + r);
-        if (!s)
+        char *tmp = realloc(s, len + r);
+        if (!tmp)
+        {
+            fprintf(stderr, "Error: ");
+            perror("realloc");
+            free(s);
             return 1;
+        }
+        s = tmp;
         memmove(s + len, buf, r);
         len += r;
     }
+    if (r < 0)
+    {
+        fprintf(stderr, "Error: ");
+        perror("read");
+        free(s);
+        return 1;
+    }
+
     int fl = strlen(av[1]);
     for (int i = 0; i < len;)
     {
-        if (memmem(s + i, len - i, av[1], fl) == s + i)
+        if (i + fl <= len &&
+            memmem(s + i, len - i, av[1], fl) == s + i)
         {
             for (int j = 0; j < fl; j++)
                 write(1, "*", 1);
@@ -99,6 +118,7 @@ int main(int ac, char **av)
         else
             write(1, s + i++, 1);
     }
+
     free(s);
     return 0;
 }
