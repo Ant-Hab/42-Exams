@@ -39,8 +39,7 @@ void solve(char *s, int i, int last, char *p)
 
 int main(int ac, char **av)
 {
-    if (ac != 2)
-        return 1;
-    solve(av[1], 0, 0, "()");
+    if (ac == 2)
+        solve(av[1], 0, 0, "()");
     return 0;
 }

@@ -28,14 +28,15 @@ void solve(int *q, int n, int c)
 
 int main(int ac, char **av)
 {
-    if (ac != 2)
-        return 0;
-    int n = atoi(av[1]);
-    int *q = malloc(sizeof(int) * n);
-    if (q)
+    if (ac == 2)
     {
-        solve(q, n, 0);
-        free(q);
+        int n = atoi(av[1]);
+        int *q = malloc(sizeof(int) * n);
+        if (q)
+        {
+            solve(q, n, 0);
+            free(q);
+        }
     }
     return 0;
 }
