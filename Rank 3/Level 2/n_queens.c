@@ -6,7 +6,7 @@ void solve(int *q, int n, int c)
     if (c == n)
     {
         for (int i = 0; i < n; i++)
-            fprintf(stdout, "%d%c", q[i], i == n - 1 ? '\n' : ' ');
+            printf("%d%c", q[i], i == n - 1 ? '\n' : ' ');
         return;
     }
     for (int r = 0; r < n; r++)
