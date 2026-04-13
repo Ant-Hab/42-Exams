@@ -69,6 +69,6 @@ int picoshell(char **cmds[])
     if (prev != -1)
         close(prev);
 
-    while (wait(NULL) > 0);
+    while (wait(NULL) != -1);
     return (0);
 }
